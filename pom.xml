@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.hup</groupId>
+    <artifactId>hup-platform</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>hup-platform-rabbitmq</module>
+    </modules>
+
+    <properties>
+        <definition-bom.version>1.0-SNAPSHOT</definition-bom.version>
+    </properties>
+    <repositories>
+        <repository>
+            <id>nexus</id>
+            <url>http://118.31.20.148:8081/repository/nexus-proxy//</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>nexus</id>
+            <url>http://118.31.20.148:8081/repository/nexus-public/</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Releases</name>
+            <url>http://118.31.20.148:8081/repository/nexus-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Snapshot</name>
+            <url>http://118.31.20.148:8081/repository/nexus-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+   <dependencies>
+       <dependency>
+           <groupId>org.projectlombok</groupId>
+           <artifactId>lombok</artifactId>
+       </dependency>
+   </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.hup</groupId>
+                <artifactId>definition-bom</artifactId>
+                <version>${definition-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

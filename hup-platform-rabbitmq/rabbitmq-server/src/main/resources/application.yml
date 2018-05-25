@@ -1,0 +1,10 @@
+server:
+  port: 8673
+
+spring:
+  rabbitmq:
+    host: 118.31.20.148
+    port: 5672
+    username: hupeng
+    password: hupeng
+    virtual-host: /
