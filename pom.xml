@@ -15,10 +15,11 @@
     <properties>
         <definition-bom.version>1.0-SNAPSHOT</definition-bom.version>
     </properties>
+
     <repositories>
         <repository>
             <id>nexus</id>
-            <url>http://118.31.20.148:8081/repository/nexus-proxy//</url>
+            <url>http://118.31.20.148:8081/repository/nexus-proxy/</url>
         </repository>
     </repositories>
 
@@ -33,12 +34,12 @@
         <repository>
             <id>nexus</id>
             <name>Releases</name>
-            <url>http://118.31.20.148:8081/repository/nexus-releases</url>
+            <url>http://118.31.20.148:8081/repository/nexus-releases/</url>
         </repository>
         <snapshotRepository>
             <id>nexus</id>
             <name>Snapshot</name>
-            <url>http://118.31.20.148:8081/repository/nexus-snapshots</url>
+            <url>http://118.31.20.148:8081/repository/nexus-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
