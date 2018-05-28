@@ -1,4 +1,4 @@
-package com.hup.platform.rabbitmq.common;
+package com.hup.platform.rabbitmq.server.common;
 
 public class QueueConstant {
 

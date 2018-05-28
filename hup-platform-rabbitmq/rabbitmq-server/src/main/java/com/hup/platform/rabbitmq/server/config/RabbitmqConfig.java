@@ -1,6 +1,6 @@
-package com.hup.platform.rabbitmq.config;
+package com.hup.platform.rabbitmq.server.config;
 
-import com.hup.platform.rabbitmq.common.QueueConstant;
+import com.hup.platform.rabbitmq.server.common.QueueConstant;
 import org.springframework.amqp.core.Queue;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

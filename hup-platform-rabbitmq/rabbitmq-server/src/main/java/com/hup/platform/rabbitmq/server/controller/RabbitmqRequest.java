@@ -1,4 +1,4 @@
-package com.hup.platform.rabbitmq.controller;
+package com.hup.platform.rabbitmq.server.controller;
 
 import lombok.Data;
 
