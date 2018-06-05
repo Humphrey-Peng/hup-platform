@@ -2,4 +2,11 @@ spring:
   mail:
     host: smtp.163.com
     username: m17364550730@163.com
-    password:
+    password: hupeng1119
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true

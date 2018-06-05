@@ -11,6 +11,7 @@
     <modules>
         <module>hup-platform-rabbitmq</module>
         <module>hup-platform-mail</module>
+        <module>hup-platform-file</module>
     </modules>
 
     <properties>
@@ -49,6 +50,7 @@
            <groupId>org.projectlombok</groupId>
            <artifactId>lombok</artifactId>
        </dependency>
+
    </dependencies>
 
     <dependencyManagement>
