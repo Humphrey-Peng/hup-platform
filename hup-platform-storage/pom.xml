@@ -9,7 +9,12 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>hup-platform-file</artifactId>
+    <artifactId>hup-platform-storage</artifactId>
+    <packaging>pom</packaging>
+    <modules>
+        <module>storage-client</module>
+        <module>storage-server</module>
+    </modules>
 
 
 </project>

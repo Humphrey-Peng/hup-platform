@@ -11,7 +11,8 @@
     <modules>
         <module>hup-platform-rabbitmq</module>
         <module>hup-platform-mail</module>
-        <module>hup-platform-file</module>
+        <module>hup-platform-storage</module>
+        <module>hup-platform-basic</module>
     </modules>
 
     <properties>
