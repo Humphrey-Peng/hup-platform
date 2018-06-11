@@ -4,8 +4,6 @@ eureka:
     fetchRegistry: false
     service-url:
       defaultZone: http://${eureka.instance.hostname}:8761/eureka/
-  server:
-    waitTimeInMsWhenSyncEmpty: 0
   instance:
     hostname: localhost
 spring:

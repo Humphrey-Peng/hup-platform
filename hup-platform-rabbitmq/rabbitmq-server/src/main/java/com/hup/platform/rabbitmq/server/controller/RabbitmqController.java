@@ -1,5 +1,6 @@
 package com.hup.platform.rabbitmq.server.controller;
 
+import com.hup.platform.rabbitmq.model.RabbitmqRequest;
 import com.hup.platform.rabbitmq.server.service.SenderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;

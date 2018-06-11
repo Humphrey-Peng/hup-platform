@@ -14,6 +14,7 @@
     <modules>
         <module>rabbitmq-client</module>
         <module>rabbitmq-server</module>
+        <module>rabbitmq-model</module>
     </modules>
 
 

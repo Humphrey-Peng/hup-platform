@@ -1,6 +1,6 @@
 package com.hup.platform.rabbitmq.server.service.impl;
 
-import com.hup.platform.rabbitmq.server.controller.RabbitmqRequest;
+import com.hup.platform.rabbitmq.model.RabbitmqRequest;
 import com.hup.platform.rabbitmq.server.service.SenderService;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

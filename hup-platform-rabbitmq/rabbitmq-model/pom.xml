@@ -9,13 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>rabbitmq-client</artifactId>
+    <artifactId>rabbitmq-model</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.hup</groupId>
-            <artifactId>rabbitmq-server</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
+
 </project>
