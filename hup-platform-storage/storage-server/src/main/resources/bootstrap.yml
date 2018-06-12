@@ -12,3 +12,9 @@ management:
 spring:
   application:
     name: platform-storage
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
+
