@@ -52,7 +52,6 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>1.5.10.RELEASE</version>
                 <configuration>
                     <mainClass>com.hup.registry.server.RegistryApplication</mainClass>
                 </configuration>
@@ -67,7 +66,6 @@
             <plugin>
                 <groupId>com.spotify</groupId>
                 <artifactId>docker-maven-plugin</artifactId>
-                <version>1.0.0</version>
                 <configuration>
                     <imageName>${docker.name}</imageName>
                     <imageTags>latest</imageTags>
