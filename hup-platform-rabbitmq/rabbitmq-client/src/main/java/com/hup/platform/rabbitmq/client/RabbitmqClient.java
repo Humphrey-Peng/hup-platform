@@ -1,6 +1,6 @@
 package com.hup.platform.rabbitmq.client;
 
-import com.hup.platform.rabbitmq.server.controller.RabbitmqRequest;
+import com.hup.platform.rabbitmq.model.RabbitmqRequest;
 import org.springframework.cloud.netflix.feign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

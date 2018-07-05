@@ -7,6 +7,11 @@ eureka:
 spring:
   application:
     name: gateway-server
+  cloud:
+    config:
+      discovery:
+        enabled: true
+        service-id: config-server
 
 zuul:
   sensitive-headers: Cookie,Set-Cookie

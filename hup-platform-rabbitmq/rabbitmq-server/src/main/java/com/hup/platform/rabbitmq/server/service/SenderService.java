@@ -1,7 +1,7 @@
 package com.hup.platform.rabbitmq.server.service;
 
 
-import com.hup.platform.rabbitmq.server.controller.RabbitmqRequest;
+import com.hup.platform.rabbitmq.model.RabbitmqRequest;
 
 public interface SenderService {
 
