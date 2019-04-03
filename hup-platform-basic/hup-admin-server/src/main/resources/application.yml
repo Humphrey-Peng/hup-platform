@@ -1,7 +1,0 @@
-server:
-  port: 8000
-#打印日志
-logging:
-  level:
-    com:
-      hup: debug

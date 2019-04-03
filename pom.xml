@@ -4,15 +4,16 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.hup</groupId>
-    <artifactId>hup-platform</artifactId>
+    <groupId>com.zan.hu</groupId>
+    <artifactId>zan-base</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-        <module>hup-platform-rabbitmq</module>
-        <module>hup-platform-mail</module>
-        <module>hup-platform-storage</module>
-        <module>hup-platform-basic</module>
+        <module>registry-server</module>
+        <module>admin-server</module>
+        <module>zipkin-server</module>
+        <module>config-server</module>
+        <module>gateway-server</module>
     </modules>
 
     <properties>
@@ -33,13 +34,6 @@
         </repository>
     </repositories>
 
-    <pluginRepositories>
-        <pluginRepository>
-            <id>nexus</id>
-            <url>http://118.31.20.148:8081/repository/maven-public/</url>
-        </pluginRepository>
-    </pluginRepositories>
-
     <distributionManagement>
         <repository>
             <id>nexus</id>
@@ -53,20 +47,20 @@
         </snapshotRepository>
     </distributionManagement>
 
-   <dependencies>
-       <dependency>
-           <groupId>org.projectlombok</groupId>
-           <artifactId>lombok</artifactId>
-       </dependency>
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
 
-   </dependencies>
+    </dependencies>
 
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.hup</groupId>
-                <artifactId>definition-bom</artifactId>
-                <version>${definition-bom.version}</version>
+                <groupId>com.zan.hup</groupId>
+                <artifactId>common-bom</artifactId>
+                <version>${project.version}</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
