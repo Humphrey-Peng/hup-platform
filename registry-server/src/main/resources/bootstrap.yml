@@ -1,0 +1,17 @@
+eureka:
+  ## environment: ${spring.profiles.active:default}
+  client:
+    fetch-registry: false
+    register-with-eureka: false
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: registry-server
+
+#默认开放info，health，下面配置开放所有的端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
