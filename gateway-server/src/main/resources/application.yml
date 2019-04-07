@@ -19,10 +19,18 @@ spring:
             - Path=/auth/**
           filters:
             - StripPrefix=1
+        - id: sys-server
+          uri: lb://sys-server
+          predicates:
+            - Path=/sys/**
+          filters:
+            - StripPrefix=1
+
       discovery:
         locator:
           enabled: true
-
+  profiles:
+    active: dev
 
 
 logging:
