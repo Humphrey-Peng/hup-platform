@@ -2,6 +2,7 @@ package com.zan.hu.gateway;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.cloud.client.SpringCloudApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
  * @version 1.0
@@ -10,6 +11,7 @@ import org.springframework.cloud.client.SpringCloudApplication;
  * @Description todo
  **/
 @SpringCloudApplication
+@ComponentScan("com.zan.hu")
 public class GatewayApplication {
 
     public static void main(String[] args) {

@@ -6,13 +6,6 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: consumer
-          uri: lb://consumer-server
-          predicates:
-            - Path=/consumer/**
-          filters:
-            - StripPrefix=1
-
         - id: auth-server
           uri: lb://auth-server
           predicates:
@@ -25,13 +18,21 @@ spring:
             - Path=/sys/**
           filters:
             - StripPrefix=1
+        - id: goods-server
+          uri: lb://goods-server
+          predicates:
+            - Path=/goods/**
+          filters:
+            - StripPrefix=1
 
       discovery:
         locator:
           enabled: true
   profiles:
     active: dev
-
+  redis:
+    host: 118.31.20.148
+    port: 6378
 
 logging:
   level:
