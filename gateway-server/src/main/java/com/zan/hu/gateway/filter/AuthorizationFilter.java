@@ -1,27 +1,24 @@
 package com.zan.hu.gateway.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.zan.hu.common.entity.AccessTokenDto;
-import com.zan.hu.common.service.RedisService;
-import com.zan.hu.common.utils.ObjectMapperUtils;
+import com.zan.hu.gateway.exception.ExceptionHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.net.URI;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * @version 1.0
@@ -34,36 +31,44 @@ import java.util.Set;
 public class AuthorizationFilter implements GlobalFilter {
 
     @Autowired
-    private RedisService redisService;
+    private TokenStore tokenStore;
 
     private static final String BEARER_TYPE = "Bearer";
 
+    private DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        defaultTokenServices.setTokenStore(tokenStore);
         ServerHttpRequest request = exchange.getRequest();
-        Boolean predicate = predicate(exchange);
-        if (!predicate) {
-            String token = extractHeaderToken(request);
-            if (StringUtils.isBlank(token)) {
-                log.debug("Token not found in headers. Trying request parameters.");
-                return chain.filter(exchange);
+        String token = extractHeaderToken(request);
+        Boolean predicate = predicate(request, token);
+        if (predicate) {//如果是登录请求
+            log.info(exchange.getAttribute("username") + "正在登录！");
+            return chain.filter(exchange);
+        }
+        if (StringUtils.isBlank(token)) {
+            log.error("Token not found in headers. Trying request parameters.");
+            throw new ExceptionHandler("Token is empty");
+        }
+        try {
+            OAuth2Authentication oAuth2Authentication = defaultTokenServices.loadAuthentication(token);
+            if (!oAuth2Authentication.getUserAuthentication().isAuthenticated()) {
+                log.info(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户");
+                throw new ExceptionHandler(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户,请登录认证");
             }
-            Set<Object> accessTokens = redisService.members(token);
-            AccessTokenDto accessTokenDto = getAccessTokenDto(accessTokens);
-            boolean expires = isExpires(accessTokenDto.getExpiresIn());
-            if (expires) {
-                log.debug("Token is expires. log in again.");
-                return Mono.empty();
-            }
+            ServerHttpRequest user = exchange.getRequest().mutate().header("user", "").build();
+            exchange = exchange.mutate().request(user).build();
+        } catch (AuthenticationException e) {
+            throw new ExceptionHandler(e.getMessage());
         }
         return chain.filter(exchange);
     }
 
-    private Boolean predicate(ServerWebExchange serverWebExchange) {
-        URI uri = serverWebExchange.getRequest().getURI();
+    private Boolean predicate(ServerHttpRequest request, String token) {
+        URI uri = request.getURI();
         String requestUri = uri.getPath();
-        String authorization = extractHeaderToken(serverWebExchange.getRequest());
-        if (isSignIn(requestUri) && StringUtils.isBlank(authorization)) {//登录请求
+        if (isSignIn(requestUri) && StringUtils.isBlank(token)) {//登录请求
             return true;
         }
         return false;
@@ -94,24 +99,4 @@ public class AuthorizationFilter implements GlobalFilter {
         return url.contains("/login/logout");
     }
 
-    private boolean isExpires(Long expiresIn) {
-        Long now = new Date().getTime();
-        if (expiresIn < now)
-            return true;
-        return false;
-    }
-
-    private AccessTokenDto getAccessTokenDto(Set<Object> accessTokens) {
-        List<AccessTokenDto> accessTokenDtos = null;
-        for (Object accessToken : accessTokens) {
-            ObjectMapper objectMapper = ObjectMapperUtils.newInstance();
-            try {
-                accessTokenDtos = objectMapper.readValue(accessToken.toString(), TypeFactory.defaultInstance().constructCollectionType(List.class, AccessTokenDto.class));
-            } catch (IOException e) {
-                log.error(e.getMessage());
-                e.printStackTrace();
-            }
-        }
-        return CollectionUtils.isEmpty(accessTokenDtos) ? null : accessTokenDtos.get(0);
-    }
 }

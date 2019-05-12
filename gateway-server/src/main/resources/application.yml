@@ -36,4 +36,4 @@ spring:
 
 logging:
   level:
-    com.zan: error
+    com.zan.hu: error
