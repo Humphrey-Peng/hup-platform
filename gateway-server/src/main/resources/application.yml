@@ -24,6 +24,12 @@ spring:
             - Path=/goods/**
           filters:
             - StripPrefix=1
+        - id: user-server
+          uri: lb://user-server
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
 
       discovery:
         locator:
@@ -37,3 +43,18 @@ spring:
 logging:
   level:
     com.zan.hu: error
+
+####白名单路由
+white:
+  list:
+    route-ids:
+      - service-name: user-server
+        routes:
+          - httpMethod: post
+            path: /api/account
+      - service-name: auth-server
+        routes:
+          - httpMethod: post
+            path: /oauth/token
+          - httpMethod: delete
+            path: /oauth/token

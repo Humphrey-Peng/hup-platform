@@ -1,22 +1,29 @@
 package com.zan.hu.gateway.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.zan.hu.common.utils.ObjectMapperUtils;
 import com.zan.hu.gateway.exception.ExceptionHandler;
+import com.zan.hu.gateway.properties.WhiteList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.route.Route;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
-import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Objects;
 
@@ -26,12 +33,20 @@ import java.util.Objects;
  * @Date 2019-05-04 12:38
  * @Description 鉴权过滤器
  **/
-@Component
+@EnableConfigurationProperties(value = WhiteList.class)
 @Slf4j
+@Configuration
 public class AuthorizationFilter implements GlobalFilter {
 
     @Autowired
     private TokenStore tokenStore;
+
+
+    private WhiteList whiteList;
+
+    public AuthorizationFilter(WhiteList whiteList) {
+        this.whiteList = whiteList;
+    }
 
     private static final String BEARER_TYPE = "Bearer";
 
@@ -40,41 +55,39 @@ public class AuthorizationFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         defaultTokenServices.setTokenStore(tokenStore);
-        ServerHttpRequest request = exchange.getRequest();
-        String token = extractHeaderToken(request);
-        Boolean predicate = predicate(request, token);
-        if (predicate) {//如果是登录请求
-            log.info(exchange.getAttribute("username") + "正在登录！");
+        String token = extractHeaderToken(exchange);
+        boolean aWhile = isWhile(exchange);
+        if (aWhile) {//如果是白名单配置
             return chain.filter(exchange);
         }
         if (StringUtils.isBlank(token)) {
             log.error("Token not found in headers. Trying request parameters.");
             throw new ExceptionHandler("Token is empty");
         }
-        try {
-            OAuth2Authentication oAuth2Authentication = defaultTokenServices.loadAuthentication(token);
-            if (!oAuth2Authentication.getUserAuthentication().isAuthenticated()) {
-                log.info(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户");
-                throw new ExceptionHandler(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户,请登录认证");
-            }
-            ServerHttpRequest user = exchange.getRequest().mutate().header("user", "").build();
-            exchange = exchange.mutate().request(user).build();
-        } catch (AuthenticationException e) {
-            throw new ExceptionHandler(e.getMessage());
+        OAuth2Authentication oAuth2Authentication = defaultTokenServices.loadAuthentication(token);
+        if (!oAuth2Authentication.getUserAuthentication().isAuthenticated()) {
+            log.info(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户");
+            throw new ExceptionHandler(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户,请登录认证");
         }
+        String details = "";
+        try {
+            details = ObjectMapperUtils.newInstance().writeValueAsString(oAuth2Authentication.getDetails());
+        } catch (JsonProcessingException e) {
+            log.info("OAuth2Authentication details transfer to json fail");
+        }
+        String encode = null;
+        try {
+            encode = URLEncoder.encode(details, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        ServerHttpRequest tempRequest = exchange.getRequest().mutate().header("details", encode).build();
+        exchange = exchange.mutate().request(tempRequest).build();
         return chain.filter(exchange);
     }
 
-    private Boolean predicate(ServerHttpRequest request, String token) {
-        URI uri = request.getURI();
-        String requestUri = uri.getPath();
-        if (isSignIn(requestUri) && StringUtils.isBlank(token)) {//登录请求
-            return true;
-        }
-        return false;
-    }
-
-    private String extractHeaderToken(ServerHttpRequest request) {
+    private String extractHeaderToken(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
         List<String> headers = request.getHeaders().get("Authorization");
         if (Objects.nonNull(headers) && headers.size() > 0) { // typically there is only one (most servers enforce that)
             String value = headers.get(0);
@@ -91,12 +104,24 @@ public class AuthorizationFilter implements GlobalFilter {
         return null;
     }
 
-    private boolean isSignIn(String url) {
-        return url.contains("/oauth/token");
-    }
-
-    private boolean isLogoutUrl(String url) {
-        return url.contains("/login/logout");
+    private boolean isWhile(ServerWebExchange exchange) {
+        Object attribute = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
+        Route currentRoute = (Route) attribute;
+        ServerHttpRequest request = exchange.getRequest();
+        String methodValue = request.getMethodValue();
+        URI uri = request.getURI();
+        String path = uri.getPath();
+        if (whiteList != null && !CollectionUtils.isEmpty(whiteList.getRouteIds())) {
+            for (WhiteList.RouteId routeId : whiteList.getRouteIds()) {
+                if (Objects.equals(routeId.getServiceName(), currentRoute.getId()) && !CollectionUtils.isEmpty(routeId.getRoutes())) {
+                    for (WhiteList.Route route : routeId.getRoutes()) {
+                        if (Objects.equals(route.getHttpMethod(), methodValue.toLowerCase()) && Objects.equals(route.getPath(), path))
+                            return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
 }
