@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.zan.hu.common.utils.ObjectMapperUtils;
 import com.zan.hu.gateway.exception.ExceptionHandler;
 import com.zan.hu.gateway.properties.WhiteList;
+import com.zan.hu.redis.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +15,8 @@ import org.springframework.cloud.gateway.route.Route;
 import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.security.oauth2.provider.token.TokenStore;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.server.ServerWebExchange;
@@ -25,6 +26,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -38,9 +40,13 @@ import java.util.Objects;
 @Configuration
 public class AuthorizationFilter implements GlobalFilter {
 
+    private static final String ACCESS_TO_REFRESH = "access_to_refresh:";
+
     @Autowired
     private TokenStore tokenStore;
 
+    @Autowired
+    private RedisService redisService;
 
     private WhiteList whiteList;
 
@@ -50,11 +56,8 @@ public class AuthorizationFilter implements GlobalFilter {
 
     private static final String BEARER_TYPE = "Bearer";
 
-    private DefaultTokenServices defaultTokenServices = new DefaultTokenServices();
-
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        defaultTokenServices.setTokenStore(tokenStore);
         String token = extractHeaderToken(exchange);
         boolean aWhile = isWhile(exchange);
         if (aWhile) {//如果是白名单配置
@@ -64,10 +67,9 @@ public class AuthorizationFilter implements GlobalFilter {
             log.error("Token not found in headers. Trying request parameters.");
             throw new ExceptionHandler("Token is empty");
         }
-        OAuth2Authentication oAuth2Authentication = defaultTokenServices.loadAuthentication(token);
-        if (!oAuth2Authentication.getUserAuthentication().isAuthenticated()) {
-            log.info(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户");
-            throw new ExceptionHandler(oAuth2Authentication.getUserAuthentication().getName() + "未认证用户,请登录认证");
+        OAuth2Authentication oAuth2Authentication = tokenStore.readAuthentication(token);
+        if (isLogout(token)) {
+            throw new ExceptionHandler("用户" + oAuth2Authentication.getUserAuthentication().getName() + "：token失效，请重新登录");
         }
         String details = "";
         try {
@@ -122,6 +124,20 @@ public class AuthorizationFilter implements GlobalFilter {
             }
         }
         return false;
+    }
+
+
+    private boolean isLogout(String token) {
+        OAuth2AccessToken oAuth2AccessToken = tokenStore.readAccessToken(token);
+        Map<String, Object> additionalInformation = oAuth2AccessToken.getAdditionalInformation();
+        String guid = additionalInformation.get("guid").toString();
+        Object o = redisService.get(ACCESS_TO_REFRESH + guid);
+        if (o != null) {
+            String accessToken = redisService.get(ACCESS_TO_REFRESH + guid).toString();
+            if (StringUtils.isEmpty(accessToken))
+                return false;
+        }
+        return true;
     }
 
 }

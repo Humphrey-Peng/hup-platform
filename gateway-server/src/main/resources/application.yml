@@ -57,4 +57,9 @@ white:
           - httpMethod: post
             path: /oauth/token
           - httpMethod: delete
-            path: /oauth/token
+            path: /oauth/token/logout
+
+redis:
+  basic:
+    server:
+      enable: true
