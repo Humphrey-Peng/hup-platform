@@ -12,10 +12,10 @@ spring:
             - Path=/auth/**
           filters:
             - StripPrefix=1
-        - id: sys-server
-          uri: lb://sys-server
+        - id: account-server
+          uri: lb://account-server
           predicates:
-            - Path=/sys/**
+            - Path=/account/**
           filters:
             - StripPrefix=1
         - id: goods-server
