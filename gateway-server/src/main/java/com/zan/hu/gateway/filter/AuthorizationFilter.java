@@ -1,7 +1,7 @@
 package com.zan.hu.gateway.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.zan.hu.common.utils.ObjectMapperUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zan.hu.gateway.exception.ExceptionHandler;
 import com.zan.hu.gateway.properties.WhiteList;
 import com.zan.hu.redis.RedisService;
@@ -48,6 +48,9 @@ public class AuthorizationFilter implements GlobalFilter {
     @Autowired
     private RedisService redisService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private WhiteList whiteList;
 
     public AuthorizationFilter(WhiteList whiteList) {
@@ -68,12 +71,9 @@ public class AuthorizationFilter implements GlobalFilter {
             throw new ExceptionHandler("Token is empty");
         }
         OAuth2Authentication oAuth2Authentication = tokenStore.readAuthentication(token);
-//        if (isLogout(token)) {
-//            throw new ExceptionHandler("用户" + oAuth2Authentication.getUserAuthentication().getName() + "：token失效，请重新登录");
-//        }
         String details = "";
         try {
-            details = ObjectMapperUtils.newInstance().writeValueAsString(oAuth2Authentication.getDetails());
+            details = objectMapper.writeValueAsString(oAuth2Authentication.getDetails());
         } catch (JsonProcessingException e) {
             log.info("OAuth2Authentication details transfer to json fail");
         }
