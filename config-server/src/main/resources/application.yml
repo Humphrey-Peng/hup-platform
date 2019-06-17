@@ -1,0 +1,16 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/chunjiege/zan-warehouse.git
+          search-paths: master
+          username: chunjiege
+          password: hupeng1119
+
+server:
+  port: 8888

@@ -1,0 +1,65 @@
+server:
+  port: 8000
+spring:
+  application:
+    name: gateway-server
+  cloud:
+    gateway:
+      routes:
+        - id: auth-server
+          uri: lb://auth-server
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
+        - id: account-server
+          uri: lb://account-server
+          predicates:
+            - Path=/account/**
+          filters:
+            - StripPrefix=1
+        - id: goods-server
+          uri: lb://goods-server
+          predicates:
+            - Path=/goods/**
+          filters:
+            - StripPrefix=1
+        - id: user-server
+          uri: lb://user-server
+          predicates:
+            - Path=/user/**
+          filters:
+            - StripPrefix=1
+
+      discovery:
+        locator:
+          enabled: true
+  profiles:
+    active: dev
+  redis:
+    host: 118.31.20.148
+    port: 6378
+
+logging:
+  level:
+    com.zan.hu: error
+
+####白名单路由
+white:
+  list:
+    route-ids:
+      - service-name: user-server
+        routes:
+          - httpMethod: post
+            path: /api/account
+      - service-name: auth-server
+        routes:
+          - httpMethod: post
+            path: /oauth/token
+          - httpMethod: delete
+            path: /oauth/token/logout
+
+redis:
+  basic:
+    server:
+      enable: true

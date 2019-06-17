@@ -1,0 +1,6 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: ${eureka.client.serviceUrl.defaultZone:http://localhost:8761/eureka/}
+      #容器注册的时候一定要注册中心的服务名注册
+      #defaultZone: ${eureka.client.serviceUrl.defaultZone:http://registry-server:8761/eureka/}
