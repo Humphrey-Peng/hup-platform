@@ -71,6 +71,9 @@ public class AuthorizationFilter implements GlobalFilter {
             throw new ExceptionHandler("Token is empty");
         }
         OAuth2Authentication oAuth2Authentication = tokenStore.readAuthentication(token);
+        if (isLogout(token)) {
+            throw new ExceptionHandler("用户" + oAuth2Authentication.getUserAuthentication().getName() + "：token失效，请重新登录");
+        }
         String details = "";
         try {
             details = objectMapper.writeValueAsString(oAuth2Authentication.getDetails());
